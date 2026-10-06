@@ -8,21 +8,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     :root {
-      --pingu-black: #0f172a;
-      --pingu-navy: #1e293b;
+      --pingu-black: #18181b;
+      --pingu-belly: #f8fafc;
       --pingu-orange: #ea580c;
-      --pingu-beak: #f97316;
+      --pingu-beak-red: #dc2626;
+      --pingu-beak-lip: #f97316;
       --wedding-rose: #f43f5e;
       --wedding-pink-bg: #fff1f2;
       --wedding-border: #fecdd3;
       --ice-blue: #e0f2fe;
       --ice-blue-text: #0284c7;
-      --cream-bg: #fffaf5;
+      --cream-bg: #faf5ee;
       --card-bg: #ffffff;
       --text-main: #1e293b;
       --text-muted: #64748b;
       --shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-      --border-radius: 18px;
+      --border-radius: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,39 +39,57 @@
       margin: 0 auto;
     }
 
-    /* 頂部 Pingu 婚禮 Header */
+    /* 頂部 Pingu 經典黏土動畫 Header */
     header {
-      text-align: center;
-      padding: 26px 16px;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #881337 100%);
+      background: linear-gradient(135deg, #090d16 0%, #1e293b 60%, #4c0519 100%);
       border-radius: var(--border-radius);
       color: #ffffff;
       margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
-      border: 2px solid rgba(251, 113, 133, 0.3);
+      padding: 24px 16px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.28);
+      border: 2px solid rgba(251, 113, 133, 0.35);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
-    header::before {
-      content: "🐧🎩";
-      position: absolute;
-      left: 16px;
-      top: 14px;
-      font-size: 2rem;
+
+    /* 左右兩隻經典 Pingu 舞台區 */
+    .pingu-stage {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 12px;
+      padding: 0 10px;
     }
-    header::after {
-      content: "🐧👰‍♀️💐";
-      position: absolute;
-      right: 16px;
-      top: 14px;
-      font-size: 2rem;
+
+    .pingu-char {
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
     }
-    header h1 {
+    .pingu-char:hover {
+      transform: scale(1.1) rotate(-3deg);
+    }
+    .pingu-char:active {
+      transform: scale(0.95);
+    }
+
+    .pingu-title-box {
+      flex: 1;
+      padding: 0 12px;
+    }
+    .header-h1 {
       font-size: 1.55rem;
       color: #ffe4e6;
-      margin-bottom: 6px;
+      font-weight: 800;
       letter-spacing: 0.5px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      margin-bottom: 6px;
     }
     .header-sub {
       font-size: 0.92rem;
@@ -81,11 +100,42 @@
       display: inline-block;
       margin-top: 8px;
       background: rgba(255, 255, 255, 0.15);
-      padding: 3px 12px;
+      padding: 4px 14px;
       border-radius: 20px;
       font-size: 0.8rem;
       color: #ffffff;
       letter-spacing: 0.5px;
+    }
+
+    /* Noot Noot 浮動對話框 */
+    .speech-bubble {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      background: #ffffff;
+      color: #be123c;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 0.78rem;
+      border: 2px solid #f43f5e;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: floatNoot 2s infinite ease-in-out;
+      pointer-events: none;
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 18px;
+      border-width: 8px 6px 0;
+      border-style: solid;
+      border-color: #ffffff transparent;
+    }
+
+    @keyframes floatNoot {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
 
     /* 狀態列 */
@@ -106,7 +156,7 @@
       font-weight: 500;
     }
     .btn-sync {
-      background: linear-gradient(135deg, var(--pingu-orange), var(--pingu-beak));
+      background: linear-gradient(135deg, var(--pingu-orange), #f97316);
       color: white;
       border: none;
       padding: 6px 14px;
@@ -116,7 +166,7 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
       transition: transform 0.1s, opacity 0.2s;
     }
@@ -146,13 +196,13 @@
       transition: all 0.2s;
     }
     .tab-btn.active {
-      background: linear-gradient(135deg, var(--pingu-black), var(--pingu-navy));
+      background: linear-gradient(135deg, #090d16, #1e293b);
       color: #ffe4e6;
       border-color: var(--wedding-rose);
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
     }
 
-    /* Day 1 去程方案頂部切換膠囊 */
+    /* Day 1 去程方案切換膠囊 */
     .plan-selector-box {
       background: var(--wedding-pink-bg);
       border: 1.5px solid var(--wedding-border);
@@ -204,18 +254,18 @@
       padding-left: 4px;
     }
     .day-badge {
-      background: linear-gradient(135deg, var(--pingu-navy), var(--pingu-black));
+      background: linear-gradient(135deg, #090d16, #1e293b);
       color: #ffe4e6;
       padding: 4px 14px;
       border-radius: 8px;
       font-weight: bold;
       font-size: 0.95rem;
-      border-left: 4px solid var(--pingu-beak);
+      border-left: 4px solid var(--pingu-orange);
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
     }
     .day-badge.wedding {
       background: linear-gradient(135deg, #be123c, #fb7185);
-      border-left-color: #fff;
+      border-left-color: #ffffff;
     }
     .day-date {
       font-size: 0.95rem;
@@ -231,11 +281,10 @@
       box-shadow: var(--shadow);
       border: 1px solid #f1f5f9;
       border-left: 4px solid var(--pingu-orange);
-      position: relative;
     }
     .item-card.wedding-card {
       border-left-color: var(--wedding-rose);
-      background: #fffafa;
+      background: #fffdfd;
     }
     .item-top {
       display: flex;
@@ -289,7 +338,7 @@
       background: #f8fafc;
       padding: 10px;
       border-radius: 8px;
-      border-left: 3px solid var(--pingu-beak);
+      border-left: 3px solid var(--pingu-orange);
       margin-top: 6px;
     }
     .item-detail.wedding-detail {
@@ -320,237 +369,39 @@
 
   <div class="container">
     <header>
-      <h1>Noot Noot! 妮蓁婚禮 ＆ 閨蜜台中度假遊</h1>
-      <div class="header-sub">安姊 • 小邱 • 萊娜 • 小余 ｜ 台中林酒店連住 2 晚 ｜ 11/21 - 11/23</div>
-      <div class="header-tagline">🐧💍 祝福新人甜甜蜜蜜 • 姊妹歡樂充電假期 🌸✨</div>
-    </header>
+      <div class="speech-bubble" id="noot-box">NOOT NOOT! 🎺</div>
 
-    <div class="status-bar">
-      <span class="sync-text" id="sync-status">⏳ 正在連線 Google 試算表...</span>
-      <button class="btn-sync" onclick="fetchLiveData()">🔄 Noot! 即時同步</button>
-    </div>
+      <div class="pingu-stage">
+        <!-- 左側：背包袱出遊的經典 Pingu -->
+        <div class="pingu-char" onclick="pinguClick()" title="點我聽 Noot Noot!">
+          <svg width="78" height="92" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 棕色木棍與紅格紋包袱 -->
+            <path d="M12 28L88 64" stroke="#78350f" stroke-width="4.5" stroke-linecap="round"/>
+            <!-- 格紋包袱 -->
+            <ellipse cx="20" cy="24" rx="14" ry="12" fill="#ef4444"/>
+            <path d="M10 20Q20 32 30 20M12 26Q20 14 28 26" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="3,2"/>
+            <circle cx="21" cy="14" r="3" fill="#b91c1c"/>
 
-    <!-- 主頁籤按鈕 -->
-    <div class="tabs" id="tab-container">
-      <button class="tab-btn active" onclick="filterDay('ALL')">全部行程 📜</button>
-      <button class="tab-btn" onclick="filterDay('Day 1')">Day 1 抵達與小次男 🐧</button>
-      <button class="tab-btn" onclick="filterDay('Day 2')">Day 2 妮蓁浪漫婚禮 💒</button>
-      <button class="tab-btn" onclick="filterDay('Day 3')">Day 3 歌劇院與火鍋 🍲</button>
-    </div>
+            <!-- 橘黃色大腳蹼 -->
+            <ellipse cx="38" cy="106" rx="15" ry="5.5" fill="#f97316"/>
+            <ellipse cx="62" cy="108" rx="16" ry="6" fill="#ea580c"/>
 
-    <!-- Day 1 去程方案切換區 -->
-    <div class="plan-selector-box" id="day1-plan-box">
-      <div class="plan-selector-title">🔀 點選切換 Day 1 去程交通方案：</div>
-      <div class="plan-btn-group">
-        <button class="plan-btn active" id="btn-plan2" onclick="switchDay1Plan('方案2')">🚗 方案 2：Uber 直達林酒店 (推薦首選 🏆)</button>
-        <button class="plan-btn" id="btn-plan1" onclick="switchDay1Plan('方案1')">🚌 方案 1：專用道公車慢活</button>
-      </div>
-    </div>
+            <!-- 黑色圓滾滾黏土身體 -->
+            <ellipse cx="50" cy="72" rx="28" ry="32" fill="#18181b"/>
+            <!-- 白色黏土大肚子 -->
+            <ellipse cx="50" cy="74" rx="18" ry="22" fill="#f8fafc"/>
 
-    <!-- 內容呈現區 -->
-    <div id="content-container"></div>
-  </div>
+            <!-- 圓圓小黑頭 -->
+            <ellipse cx="50" cy="38" rx="20" ry="19" fill="#18181b"/>
+            <!-- 招牌大眼白與黑眼珠（回眸） -->
+            <ellipse cx="44" cy="35" rx="5.5" ry="6.5" fill="#ffffff"/>
+            <circle cx="43" cy="35" r="3" fill="#000000"/>
+            <ellipse cx="57" cy="35" rx="5.5" ry="6.5" fill="#ffffff"/>
+            <circle cx="56" cy="35" r="3" fill="#000000"/>
 
-  <script>
-    let CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?output=csv";
+            <!-- 經典嘟嘟短鳥喙 -->
+            <ellipse cx="50" cy="44" rx="6.5" ry="4.5" fill="#dc2626"/>
+            <ellipse cx="50" cy="45" rx="4" ry="2" fill="#991b1b"/>
 
-    if (!CSV_URL.startsWith('http')) {
-      CSV_URL = 'https://' + CSV_URL.replace(/^\/+/, '');
-    }
-    if (CSV_URL.includes('/pubhtml')) {
-      CSV_URL = CSV_URL.replace('/pubhtml', '/pub');
-      if (!CSV_URL.includes('output=csv')) {
-        CSV_URL += (CSV_URL.includes('?') ? '&' : '?') + 'output=csv';
-      }
-    }
-
-    let allTripData = [];
-    let currentFilter = 'ALL';
-    let currentDay1Plan = '方案2';
-
-    function buildHeaderMap(headers) {
-      const map = {};
-      headers.forEach((h, i) => {
-        if (!h) return;
-        const name = String(h).trim();
-        if (name === '天數' || name.includes('天數')) map.day = i;
-        else if (name === '日期' || name.includes('日期')) map.date = i;
-        else if (name === '時間段' || name.includes('時間')) map.time = i;
-        else if (name.includes('行程') || name.includes('主題')) {
-          if (map.title === undefined) map.title = i;
-        }
-        else if (name.includes('動線') || name.includes('交通動線')) map.route = i;
-        else if (name.includes('工具') || name.includes('交通工具')) map.trans = i;
-        else if (name.includes('停留')) map.stayTime = i;
-        else if (name.includes('費用')) map.cost = i;
-        else if (name.includes('備註')) map.remark = i;
-      });
-      return map;
-    }
-
-    function renderItinerary() {
-      const contentEl = document.getElementById('content-container');
-      const planBox = document.getElementById('day1-plan-box');
-
-      if (currentFilter === 'ALL' || currentFilter === 'Day 1') {
-        planBox.style.display = 'block';
-      } else {
-        planBox.style.display = 'none';
-      }
-
-      let filtered = allTripData.filter(item => {
-        if (!item.day) return false;
-        
-        if (item.day.includes('Day 1')) {
-          if (currentFilter !== 'ALL' && currentFilter !== 'Day 1') return false;
-          if (item.day.includes('方案')) {
-            return item.day.includes(currentDay1Plan);
-          }
-          return true;
-        }
-        
-        if (currentFilter === 'ALL') return true;
-        return item.day.includes(currentFilter);
-      });
-
-      if (filtered.length === 0) {
-        contentEl.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b;">🐧 Noot! 此分類目前無行程。</div>`;
-        return;
-      }
-
-      const groups = {};
-      filtered.forEach(item => {
-        const key = `${item.day || '行程'}__${item.date || ''}`;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-      });
-
-      let html = "";
-      for (const groupKey in groups) {
-        const [dayName, dateName] = groupKey.split('__');
-        const isWeddingDay = dayName.includes('Day 2');
-
-        html += `
-          <div class="day-section">
-            <div class="day-header">
-              <span class="day-badge ${isWeddingDay ? 'wedding' : ''}">🐧 ${dayName}</span>
-              ${dateName ? `<span class="day-date">${dateName}</span>` : ''}
-            </div>
-        `;
-
-        groups[groupKey].forEach(item => {
-          const mapQuery = encodeURIComponent(item.title.replace(/【.*?】/g, '').replace(/\(.*?\)/g, ''));
-          const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-          const isItemWedding = (item.title && (item.title.includes('婚禮') || item.title.includes('婚宴')));
-
-          html += `
-            <div class="item-card ${isItemWedding ? 'wedding-card' : ''}">
-              <div class="item-top">
-                <span class="item-time">⏰ ${item.time || '行程'}</span>
-                ${isItemWedding ? `<span class="tag" style="background:#ffe4e6; color:#be123c; font-weight:bold;">💒 幸福婚宴焦點</span>` : ''}
-              </div>
-              <div class="item-title">${item.title}</div>
-              
-              <div class="tags">
-                ${item.trans && item.trans !== '-' ? `<span class="tag trans">🚗 ${item.trans}</span>` : ''}
-                ${item.stayTime && item.stayTime !== '-' ? `<span class="tag">⏳ 停留: ${item.stayTime}</span>` : ''}
-                ${item.cost && item.cost !== '-' && item.cost !== '0' && item.cost !== '$0' ? `<span class="tag cost">💰 ${item.cost}</span>` : ''}
-              </div>
-
-              ${(item.route || item.remark) ? `
-                <div class="item-detail ${isItemWedding ? 'wedding-detail' : ''}">
-                  ${item.route && item.route !== '-' ? `<div class="item-detail-row">📍 <strong>動線：</strong>${item.route}</div>` : ''}
-                  ${item.remark && item.remark !== '-' ? `<div class="item-detail-row">💡 <strong>備註：</strong>${item.remark}</div>` : ''}
-                </div>
-              ` : ''}
-
-              <a href="${mapUrl}" target="_blank" class="nav-btn">📍 Google 地圖導航</a>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-      }
-
-      contentEl.innerHTML = html;
-    }
-
-    function filterDay(day) {
-      currentFilter = day;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.innerText.includes(day) || (day === 'ALL' && btn.innerText.includes('全部')));
-      });
-      renderItinerary();
-    }
-
-    function switchDay1Plan(plan) {
-      currentDay1Plan = plan;
-      document.getElementById('btn-plan1').classList.toggle('active', plan === '方案1');
-      document.getElementById('btn-plan2').classList.toggle('active', plan === '方案2');
-      renderItinerary();
-    }
-
-    function fetchLiveData() {
-      const statusEl = document.getElementById('sync-status');
-      statusEl.innerText = "⏳ 正在連線 Google 試算表...";
-
-      Papa.parse(CSV_URL, {
-        download: true,
-        header: false,
-        skipEmptyLines: true,
-        complete: function(results) {
-          if (results.data && results.data.length > 1) {
-            const rows = results.data;
-
-            // 精確尋找同時包含「天數」與「時間」或「日期」的標準標題列（避開最上方的合併大標題橫幅）
-            let headerIdx = rows.findIndex(r =>
-              r.some(cell => typeof cell === 'string' && cell.trim() === '天數') ||
-              (r.some(cell => typeof cell === 'string' && cell.includes('天數')) &&
-               r.some(cell => typeof cell === 'string' && (cell.includes('時間') || cell.includes('日期'))))
-            );
-
-            if (headerIdx === -1) {
-              headerIdx = rows.findIndex(r => r.some(cell => typeof cell === 'string' && cell.includes('天數')));
-            }
-            if (headerIdx === -1) headerIdx = 0;
-
-            const headerMap = buildHeaderMap(rows[headerIdx]);
-            const dataRows = rows.slice(headerIdx + 1).filter(r => {
-              return r && r.some(cell => cell && String(cell).trim() !== "");
-            });
-
-            if (dataRows.length > 0) {
-              allTripData = dataRows.map(r => {
-                const getVal = (f) => (headerMap[f] !== undefined && r[headerMap[f]]) ? String(r[headerMap[f]]).trim() : "";
-                return {
-                  day: getVal('day'),
-                  date: getVal('date'),
-                  time: getVal('time'),
-                  title: getVal('title'),
-                  route: getVal('route'),
-                  trans: getVal('trans'),
-                  stayTime: getVal('stayTime'),
-                  cost: getVal('cost'),
-                  remark: getVal('remark')
-                };
-              });
-
-              renderItinerary();
-              const now = new Date();
-              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-              statusEl.innerText = `✅ Pingu 已同步最新行程（${timeStr}）`;
-              return;
-            }
-          }
-          statusEl.innerText = `❌ 無法解析試算表內容`;
-        },
-        error: function(err) {
-          statusEl.innerText = `❌ 連線失敗，請確認網路或試算表發布狀態`;
-        }
-      });
-    }
-
-    fetchLiveData();
-  </script>
-</body>
-</html>
+            <!-- 扛木棍的黑翅膀手臂 -->
+            <path d="M50 64Q62 55 64 48" stroke="#18181b" stroke-width="8" stroke-
