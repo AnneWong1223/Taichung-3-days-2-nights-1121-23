@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐧💒 Noot Noot! 妮蓁婚禮 ＆ 閨蜜台中度假遊 💍</title>
+  <!-- 引入穩定 CSV 解析套件 PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    :root {
+      --pingu-black: #0f172a;
+      --pingu-navy: #1e293b;
+      --pingu-orange: #ea580c;
+      --pingu-beak: #f97316;
+      --wedding-rose: #f43f5e;
+      --wedding-pink-bg: #fff1f2;
+      --wedding-border: #fecdd3;
+      --ice-blue: #e0f2fe;
+      --ice-blue-text: #0284c7;
+      --cream-bg: #fffaf5;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+      --border-radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "微軟正黑體", Arial, sans-serif;
+      background-color: var(--cream-bg);
+      color: var(--text-main);
+      padding: 16px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* 頂部 Pingu 婚禮浪漫 Header */
+    header {
+      text-align: center;
+      padding: 26px 16px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #881337 100%);
+      border-radius: var(--border-radius);
+      color: #ffffff;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+      border: 2px solid rgba(251, 113, 133, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: "🐧🎩";
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      font-size: 2rem;
+    }
+    header::after {
+      content: "🐧👰‍♀️💐";
+      position: absolute;
+      right: 16px;
+      top: 14px;
+      font-size: 2rem;
+    }
+    header h1 {
+      font-size: 1.55rem;
+      color: #ffe4e6;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .header-sub {
+      font-size: 0.92rem;
+      color: #fecdd3;
+      font-weight: 500;
+    }
+    .header-tagline {
+      display: inline-block;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    /* 狀態列 */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--wedding-border);
+    }
+    .sync-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .btn-sync {
+      background: linear-gradient(135deg, var(--pingu-orange), var(--pingu-beak));
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn-sync:hover { opacity: 0.92; transform: translateY(-1px); }
+
+    /* 主頁籤按鈕 */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      min-width: 90px;
+      background: var(--card-bg);
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--pingu-black), var(--pingu-navy));
+      color: #ffe4e6;
+      border-color: var(--wedding-rose);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    }
+
+    /* Day 1 去程方案頂部切換膠囊 */
+    .plan-selector-box {
+      background: var(--wedding-pink-bg);
+      border: 1.5px solid var(--wedding-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.08);
+    }
+    .plan-selector-title {
+      font-size: 0.88rem;
+      font-weight: bold;
+      color: #9f1239;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .plan-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .plan-btn {
+      flex: 1;
+      padding: 9px 8px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .plan-btn.active {
+      background: linear-gradient(135deg, #e11d48, #f43f5e);
+      color: #ffffff;
+      border-color: #be123c;
+      box-shadow: 0 3px 8px rgba(225, 29, 72, 0.3);
+    }
+
+    /* 行程項目卡片 */
+    .day-section { margin-bottom: 26px; }
+    .day-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+    .day-badge {
+      background: linear-gradient(135deg, var(--pingu-navy), var(--pingu-black));
+      color: #ffe4e6;
+      padding: 4px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      border-left: 4px solid var(--pingu-beak);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+    }
+    .day-badge.wedding {
+      background: linear-gradient(135deg, #be123c, #fb7185);
+      border-left-color: #fff;
+    }
+    .day-date {
+      font-size: 0.95rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid #f1f5f9;
+      border-left: 4px solid var(--pingu-orange);
+      position: relative;
+    }
+    .item-card.wedding-card {
+      border-left-color: var(--wedding-rose);
+      background: #fffafa;
+    }
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .item-time {
+      background: var(--wedding-pink-bg);
+      color: #be123c;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid var(--wedding-border);
+    }
+    .item-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: var(--text-main);
+      margin: 4px 0 8px 0;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .tag {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .tag.trans {
+      background: var(--ice-blue);
+      color: var(--ice-blue-text);
+      font-weight: 600;
+      border: 1px solid #bae6fd;
+    }
+    .tag.cost {
+      background: #fff7ed;
+      color: var(--pingu-orange);
+      font-weight: bold;
+      border: 1px solid #fed7aa;
+    }
+    .item-detail {
+      font-size: 0.88rem;
+      color: #334155;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      border-left: 3px solid var(--pingu-beak);
+      margin-top: 6px;
+    }
+    .item-detail.wedding-detail {
+      background: #fff5f5;
+      border-left-color: var(--wedding-rose);
+    }
+    .item-detail-row { margin-bottom: 4px; }
+    .item-detail-row:last-child { margin-bottom: 0; }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 10px;
+      background: var(--wedding-pink-bg);
+      color: #be123c;
+      border: 1px solid var(--wedding-border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .nav-btn:hover { background: #ffe4e6; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Noot Noot! 妮蓁婚禮 ＆ 閨蜜台中度假遊</h1>
+      <div class="header-sub">安姊 • 小邱 • 萊娜 • 小余 ｜ 台中林酒店連住 2 晚 ｜ 11/21 - 11/23</div>
+      <div class="header-tagline">🐧💍 祝福新人甜甜蜜蜜 • 姊妹歡樂充電假期 🌸✨</div>
+    </header>
+
+    <div class="status-bar">
+      <span class="sync-text" id="sync-status">⏳ 正在連線 Google 試算表...</span>
+      <button class="btn-sync" onclick="fetchLiveData()">🔄 Noot! 即時同步</button>
+    </div>
+
+    <!-- 主頁籤按鈕 -->
+    <div class="tabs" id="tab-container">
+      <button class="tab-btn active" onclick="filterDay('ALL')">全部行程 📜</button>
+      <button class="tab-btn" onclick="filterDay('Day 1')">Day 1 抵達與小次男 🐧</button>
+      <button class="tab-btn" onclick="filterDay('Day 2')">Day 2 妮蓁浪漫婚禮 💒</button>
+      <button class="tab-btn" onclick="filterDay('Day 3')">Day 3 歌劇院與火鍋 🍲</button>
+    </div>
+
+    <!-- Day 1 去程方案切換區（頂部一鍵切換） -->
+    <div class="plan-selector-box" id="day1-plan-box">
+      <div class="plan-selector-title">🔀 點選切換 Day 1 去程交通方案：</div>
+      <div class="plan-btn-group">
+        <button class="plan-btn active" id="btn-plan2" onclick="switchDay1Plan('方案2')">🚗 方案 2：Uber 直達林酒店 (推薦首選 🏆)</button>
+        <button class="plan-btn" id="btn-plan1" onclick="switchDay1Plan('方案1')">🚌 方案 1：專用道公車慢活</button>
+      </div>
+    </div>
+
+    <!-- 內容呈現區 -->
+    <div id="content-container"></div>
+  </div>
+
+  <script>
+    // 🔗 您的專屬 Google 試算表 CSV 網址（已自動補齊 https://）
+    let CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?output=csv";
+
+    // 防呆處理
+    if (!CSV_URL.startsWith('http')) {
+      CSV_URL = 'https://' + CSV_URL.replace(/^\/+/, '');
+    }
+    if (CSV_URL.includes('/pubhtml')) {
+      CSV_URL = CSV_URL.replace('/pubhtml', '/pub');
+      if (!CSV_URL.includes('output=csv')) {
+        CSV_URL += (CSV_URL.includes('?') ? '&' : '?') + 'output=csv';
+      }
+    }
+
+    let allTripData = [];
+    let currentFilter = 'ALL';
+    let currentDay1Plan = '方案2'; // 預設推薦首選方案 2
+
+    function buildHeaderMap(headers) {
+      const map = {};
+      headers.forEach((h, i) => {
+        if (!h) return;
+        const name = String(h).trim();
+        if (name.includes('天數')) map.day = i;
+        else if (name.includes('日期')) map.date = i;
+        else if (name.includes('時間')) map.time = i;
+        else if (name.includes('行程') || name.includes('主題')) map.title = i;
+        else if (name.includes('動線') || name.includes('交通動線')) map.route = i;
+        else if (name.includes('工具') || name.includes('交通工具')) map.trans = i;
+        else if (name.includes('停留')) map.stayTime = i;
+        else if (name.includes('費用')) map.cost = i;
+        else if (name.includes('備註')) map.remark = i;
+      });
+      return map;
+    }
+
+    function renderItinerary() {
+      const contentEl = document.getElementById('content-container');
+      const planBox = document.getElementById('day1-plan-box');
+
+      // 控制頂部切換區顯示時機
+      if (currentFilter === 'ALL' || currentFilter === 'Day 1') {
+        planBox.style.display = 'block';
+      } else {
+        planBox.style.display = 'none';
+      }
+
+      // 依頁籤與方案過濾
+      let filtered = allTripData.filter(item => {
+        if (!item.day) return false;
+        
+        // Day 1: 依目前切換的方案過濾（方案1 或 方案2）
+        if (item.day.includes('Day 1')) {
+          if (currentFilter !== 'ALL' && currentFilter !== 'Day 1') return false;
+          return item.day.includes(currentDay1Plan);
+        }
+        
+        // Day 2 & Day 3
+        if (currentFilter === 'ALL') return true;
+        return item.day.includes(currentFilter);
+      });
+
+      if (filtered.length === 0) {
+        contentEl.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b;">🐧 Noot! 此分類目前無行程。</div>`;
+        return;
+      }
+
+      // 依天數與日期分組
+      const groups = {};
+      filtered.forEach(item => {
+        const key = `${item.day || '行程'}__${item.date || ''}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+
+      let html = "";
+      for (const groupKey in groups) {
+        const [dayName, dateName] = groupKey.split('__');
+        const isWeddingDay = dayName.includes('Day 2');
+
+        html += `
+          <div class="day-section">
+            <div class="day-header">
+              <span class="day-badge ${isWeddingDay ? 'wedding' : ''}">🐧 ${dayName}</span>
+              ${dateName ? `<span class="day-date">${dateName}</span>` : ''}
+            </div>
+        `;
+
+        groups[groupKey].forEach(item => {
+          const mapQuery = encodeURIComponent(item.title.replace(/【.*?】/g, '').replace(/\(.*?\)/g, ''));
+          const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+          const isItemWedding = (item.title && (item.title.includes('婚禮') || item.title.includes('婚宴')));
+
+          html += `
+            <div class="item-card ${isItemWedding ? 'wedding-card' : ''}">
+              <div class="item-top">
+                <span class="item-time">⏰ ${item.time || '行程'}</span>
+                ${isItemWedding ? `<span class="tag" style="background:#ffe4e6; color:#be123c; font-weight:bold;">💒 幸福婚宴焦點</span>` : ''}
+              </div>
+              <div class="item-title">${item.title}</div>
+              
+              <div class="tags">
+                ${item.trans && item.trans !== '-' ? `<span class="tag trans">🚗 ${item.trans}</span>` : ''}
+                ${item.stayTime && item.stayTime !== '-' ? `<span class="tag">⏳ 停留: ${item.stayTime}</span>` : ''}
+                ${item.cost && item.cost !== '-' && item.cost !== '0' && item.cost !== '$0' ? `<span class="tag cost">💰 ${item.cost}</span>` : ''}
+              </div>
+
+              ${(item.route || item.remark) ? `
+                <div class="item-detail ${isItemWedding ? 'wedding-detail' : ''}">
+                  ${item.route && item.route !== '-' ? `<div class="item-detail-row">📍 <strong>動線：</strong>${item.route}</div>` : ''}
+                  ${item.remark && item.remark !== '-' ? `<div class="item-detail-row">💡 <strong>備註：</strong>${item.remark}</div>` : ''}
+                </div>
+              ` : ''}
+
+              <a href="${mapUrl}" target="_blank" class="nav-btn">📍 Google 地圖導航</a>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+      }
+
+      contentEl.innerHTML = html;
+    }
+
+    function filterDay(day) {
+      currentFilter = day;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(day) || (day === 'ALL' && btn.innerText.includes('全部')));
+      });
+      renderItinerary();
+    }
+
+    function switchDay1Plan(plan) {
+      currentDay1Plan = plan;
+      document.getElementById('btn-plan1').classList.toggle('active', plan === '方案1');
+      document.getElementById('btn-plan2').classList.toggle('active', plan === '方案2');
+      renderItinerary();
+    }
+
+    function fetchLiveData() {
+      const statusEl = document.getElementById('sync-status');
+      statusEl.innerText = "⏳ 正在連線 Google 試算表...";
+
+      Papa.parse(CSV_URL, {
+        download: true,
+        header: false,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length > 1) {
+            const rows = results.data;
+            let headerIdx = rows.findIndex(r => r.some(cell => typeof cell === 'string' && (cell.includes('天數') || cell.includes('行程'))));
+            if (headerIdx === -1) headerIdx = 0;
+
+            const headerMap = buildHeaderMap(rows[headerIdx]);
+            const dataRows = rows.slice(headerIdx + 1).filter(r => r[0] && String(r[0]).trim() !== "");
+
+            if (dataRows.length > 0) {
+              allTripData = dataRows.map(r => {
+                const getVal = (f) => (headerMap[f] !== undefined && r[headerMap[f]]) ? String(r[headerMap[f]]).trim() : "";
+                return {
+                  day: getVal('day'),
+                  date: getVal('date'),
+                  time: getVal('time'),
+                  title: getVal('title'),
+                  route: getVal('route'),
+                  trans: getVal('trans'),
+                  stayTime: getVal('stayTime'),
+                  cost: getVal('cost'),
+                  remark: getVal('remark')
+                };
+              });
+
+              renderItinerary();
+              const now = new Date();
+              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+              statusEl.innerText = `✅ Pingu 已同步最新行程（${timeStr}）`;
+              return;
+            }
+          }
+          statusEl.innerText = `❌ 無法解析試算表內容`;
+        },
+        error: function(err) {
+          statusEl.innerText = `❌ 連線失敗，請確認網路或試算表發布狀態`;
+        }
+      });
+    }
+
+    fetchLiveData();
+  </script>
+</body>
+</html>
