@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐧💒 Noot Noot! 妮蓁婚禮 ＆ 閨蜜台中度假遊 💍</title>
-  <!-- 引入穩定 CSV 解析套件 PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     :root {
@@ -36,7 +35,7 @@
       margin: 0 auto;
     }
 
-    /* 頂部 Pingu 經典黏土動畫 Header */
+    /* 頂部 Header */
     header {
       background: linear-gradient(135deg, #090d16 0%, #1e293b 60%, #4c0519 100%);
       border-radius: var(--border-radius);
@@ -92,7 +91,6 @@
       color: #ffffff;
     }
 
-    /* Noot Noot 浮動對話框 */
     .speech-bubble {
       position: absolute;
       top: 10px;
@@ -333,6 +331,62 @@
       transition: background 0.15s;
     }
     .nav-btn:hover { background: #ffe4e6; }
+
+    /* 備忘清單專屬卡片樣式 */
+    .checklist-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #6366f1;
+    }
+    .checklist-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .checklist-cat {
+      background: #eef2ff;
+      color: #4338ca;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .checklist-owner {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .checklist-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .checklist-date {
+      color: #e11d48;
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .checklist-guide {
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      color: #334155;
+      border-left: 3px solid #6366f1;
+    }
   </style>
 </head>
 <body>
@@ -403,12 +457,13 @@
       <button class="btn-sync" onclick="fetchLiveData()">🔄 Noot! 即時同步</button>
     </div>
 
-    <!-- 主頁籤按鈕 -->
+    <!-- 主頁籤按鈕（加入備忘清單） -->
     <div class="tabs" id="tab-container">
       <button class="tab-btn active" onclick="filterDay('ALL')">全部行程 📜</button>
       <button class="tab-btn" onclick="filterDay('Day 1')">Day 1 抵達與小次男 🎒</button>
       <button class="tab-btn" onclick="filterDay('Day 2')">Day 2 妮蓁浪漫婚禮 💒</button>
       <button class="tab-btn" onclick="filterDay('Day 3')">Day 3 歌劇院與火鍋 🍲</button>
+      <button class="tab-btn" onclick="filterDay('CHECKLIST')">📋 備忘與待辦清單</button>
     </div>
 
     <!-- Day 1 去程方案切換區 -->
@@ -426,6 +481,66 @@
 
   <script>
     let CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?output=csv";
+
+    // 完整內建試算表第4頁備忘清單資料
+    const staticChecklist = [
+      {
+        cat: "餐廳訂位",
+        title: "皮諾可可 Pinococo 晚餐訂位",
+        date: "10/23 (四) 00:00",
+        owner: "安姊 / 待執行",
+        guide: "用餐日前 30 天開放 inline 線上訂位！週末熱門時段務必準時搶訂 11/21 18:00 四人桌"
+      },
+      {
+        cat: "餐廳訂位",
+        title: "燒瓶子。大肆鍋物 (南區店) 訂位",
+        date: "10/24 (六) 00:00",
+        owner: "安姊 / 待執行",
+        guide: "用餐日前 30 天開放 inline 訂位，鎖定 11/23 12:45 四人桌，吃飽直接前往高鐵站"
+      },
+      {
+        cat: "交通票券",
+        title: "台鐵 / 高鐵去程車票預購",
+        date: "10/23 (六) 00:00",
+        owner: "萊娜 / 待執行",
+        guide: "乘車日 28 天前開放訂票（逢週五提早開放週末訂票），建議搶購 11/21 上午約 09:30 台北出發車次（4張連號對號座）"
+      },
+      {
+        cat: "交通票券",
+        title: "高鐵回程車票預購",
+        date: "10月25日 晚上 11:55 & 10/26 (一) 00:00",
+        owner: "萊娜 / 待執行",
+        guide: "鎖定 11/23 下午車次，看是否能搶到早鳥票。"
+      },
+      {
+        cat: "住宿確認",
+        title: "台中林酒店 (The Lin Hotel) 入住細節",
+        date: "出發前 2 週",
+        owner: "全員 / 待確認",
+        guide: "再次確認訂房姓名、房型（四人房或雙人房x2），可備註高樓層、需提供 4 人份備品"
+      },
+      {
+        cat: "婚禮準備",
+        title: "妮蓁婚禮出席細節與紅包禮金",
+        date: "11/20 (行前一天)",
+        owner: "全員 / 準備中",
+        guide: "李方艾美 22F 絢麗廳（11:30~12:00 集合），準備喜宴洋裝、平底替換鞋與新人祝福紅包"
+      },
+      {
+        cat: "行李打包",
+        title: "個人證件、保養美妝與充電設備",
+        date: "11/20 (行前一天)",
+        owner: "全員 / 準備中",
+        guide: "健保卡、隨身電源（不可放托運行李）、化妝品、美美洋裝、常備藥品、折疊傘"
+      },
+      {
+        cat: "共乘分攤",
+        title: "Uber App 綁定與公費記帳",
+        date: "出發當日",
+        owner: "安姊 / 準備中",
+        guide: "由一人代表叫車與統一記帳，行程結束後一鍵結算，4 人乘車超便利"
+      }
+    ];
 
     let allTripData = [];
     let currentFilter = 'ALL';
@@ -479,6 +594,34 @@
       const contentEl = document.getElementById('content-container');
       const planBox = document.getElementById('day1-plan-box');
 
+      // 備忘清單視圖
+      if (currentFilter === 'CHECKLIST') {
+        planBox.style.display = 'none';
+        let html = `
+          <div class="day-section">
+            <div class="day-header">
+              <span class="day-badge" style="background: linear-gradient(135deg, #4338ca, #6366f1); border-left-color: #a5b4fc;">📋 重要待辦確認事項與行前備忘清單</span>
+            </div>
+        `;
+        staticChecklist.forEach(item => {
+          html += `
+            <div class="checklist-card">
+              <div class="checklist-top">
+                <span class="checklist-cat">${item.cat}</span>
+                <span class="checklist-owner">👤 ${item.owner}</span>
+              </div>
+              <div class="checklist-title">${item.title}</div>
+              <div class="checklist-date">⏰ 截止/執行日：${item.date}</div>
+              <div class="checklist-guide">💡 <strong>指引：</strong>${item.guide}</div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+        contentEl.innerHTML = html;
+        return;
+      }
+
+      // 一般行程視圖
       if (currentFilter === 'ALL' || currentFilter === 'Day 1') {
         planBox.style.display = 'block';
       } else {
@@ -563,7 +706,11 @@
     function filterDay(day) {
       currentFilter = day;
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.innerText.includes(day) || (day === 'ALL' && btn.innerText.includes('全部')));
+        btn.classList.toggle('active', 
+          (day === 'CHECKLIST' && btn.innerText.includes('備忘')) ||
+          (day === 'ALL' && btn.innerText.includes('全部')) ||
+          (day !== 'CHECKLIST' && day !== 'ALL' && btn.innerText.includes(day))
+        );
       });
       renderItinerary();
     }
@@ -586,8 +733,6 @@
         complete: function(results) {
           if (results.data && results.data.length > 1) {
             const rows = results.data;
-
-            // 自動跨列尋找含有「天數」的標題列（略過最上方的合併橫幅）
             let headerIdx = rows.findIndex(r => r.some(cell => typeof cell === 'string' && cell.trim() === '天數'));
             if (headerIdx === -1) {
               headerIdx = rows.findIndex(r => r.some(cell => typeof cell === 'string' && cell.includes('天數')));
