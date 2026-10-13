@@ -332,7 +332,7 @@
     }
     .nav-btn:hover { background: #ffe4e6; }
 
-    /* 備忘清單專屬卡片樣式 */
+    /* 備忘清單卡片樣式 */
     .checklist-card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -418,7 +418,6 @@
           </svg>
         </div>
 
-        <!-- 中間標題文字 -->
         <div class="pingu-title-box">
           <div class="header-h1">Noot Noot! 妮蓁婚禮 ＆ 閨蜜台中遊</div>
           <div class="header-sub">安姊 • 小邱 • 萊娜 • 小余 ｜ 台中林酒店連住 2 晚 ｜ 11/21 - 11/23</div>
@@ -451,13 +450,11 @@
       </div>
     </header>
 
-    <!-- 狀態列 -->
     <div class="status-bar">
       <span class="sync-text" id="sync-status">⏳ 正在連線 Google 試算表...</span>
-      <button class="btn-sync" onclick="fetchLiveData()">🔄 Noot! 即時同步</button>
+      <button class="btn-sync" onclick="fetchAllData()">🔄 Noot! 即時同步</button>
     </div>
 
-    <!-- 主頁籤按鈕（加入備忘清單） -->
     <div class="tabs" id="tab-container">
       <button class="tab-btn active" onclick="filterDay('ALL')">全部行程 📜</button>
       <button class="tab-btn" onclick="filterDay('Day 1')">Day 1 抵達與小次男 🎒</button>
@@ -466,7 +463,6 @@
       <button class="tab-btn" onclick="filterDay('CHECKLIST')">📋 備忘與待辦清單</button>
     </div>
 
-    <!-- Day 1 去程方案切換區 -->
     <div class="plan-selector-box" id="day1-plan-box">
       <div class="plan-selector-title">🔀 點選切換 Day 1 去程交通方案：</div>
       <div class="plan-btn-group">
@@ -475,73 +471,17 @@
       </div>
     </div>
 
-    <!-- 內容呈現區 -->
     <div id="content-container"></div>
   </div>
 
   <script>
-    let CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?output=csv";
+    // 1. 行程總表專屬 CSV 網址
+    const TRIP_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?output=csv";
+    
+    // 2. 備忘清單專屬 CSV 網址（已自動填入圖二專屬網址）
+    const CHECKLIST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn1rrE8yezs0akieynsjq-XVIxdBAEwymi6UwLPRtfQ9y1HCmUINXmXdiQwjal9Q/pub?gid=1987664974&single=true&output=csv";
 
-    // 完整內建試算表第4頁備忘清單資料
-    const staticChecklist = [
-      {
-        cat: "餐廳訂位",
-        title: "皮諾可可 Pinococo 晚餐訂位",
-        date: "10/23 (四) 00:00",
-        owner: "安姊 / 待執行",
-        guide: "用餐日前 30 天開放 inline 線上訂位！週末熱門時段務必準時搶訂 11/21 18:00 四人桌"
-      },
-      {
-        cat: "餐廳訂位",
-        title: "燒瓶子。大肆鍋物 (南區店) 訂位",
-        date: "10/24 (六) 00:00",
-        owner: "安姊 / 待執行",
-        guide: "用餐日前 30 天開放 inline 訂位，鎖定 11/23 12:45 四人桌，吃飽直接前往高鐵站"
-      },
-      {
-        cat: "交通票券",
-        title: "台鐵 / 高鐵去程車票預購",
-        date: "10/23 (六) 00:00",
-        owner: "萊娜 / 待執行",
-        guide: "乘車日 28 天前開放訂票（逢週五提早開放週末訂票），建議搶購 11/21 上午約 09:30 台北出發車次（4張連號對號座）"
-      },
-      {
-        cat: "交通票券",
-        title: "高鐵回程車票預購",
-        date: "10月25日 晚上 11:55 & 10/26 (一) 00:00",
-        owner: "萊娜 / 待執行",
-        guide: "鎖定 11/23 下午車次，看是否能搶到早鳥票。"
-      },
-      {
-        cat: "住宿確認",
-        title: "台中林酒店 (The Lin Hotel) 入住細節",
-        date: "出發前 2 週",
-        owner: "全員 / 待確認",
-        guide: "再次確認訂房姓名、房型（四人房或雙人房x2），可備註高樓層、需提供 4 人份備品"
-      },
-      {
-        cat: "婚禮準備",
-        title: "妮蓁婚禮出席細節與紅包禮金",
-        date: "11/20 (行前一天)",
-        owner: "全員 / 準備中",
-        guide: "李方艾美 22F 絢麗廳（11:30~12:00 集合），準備喜宴洋裝、平底替換鞋與新人祝福紅包"
-      },
-      {
-        cat: "行李打包",
-        title: "個人證件、保養美妝與充電設備",
-        date: "11/20 (行前一天)",
-        owner: "全員 / 準備中",
-        guide: "健保卡、隨身電源（不可放托運行李）、化妝品、美美洋裝、常備藥品、折疊傘"
-      },
-      {
-        cat: "共乘分攤",
-        title: "Uber App 綁定與公費記帳",
-        date: "出發當日",
-        owner: "安姊 / 準備中",
-        guide: "由一人代表叫車與統一記帳，行程結束後一鍵結算，4 人乘車超便利"
-      }
-    ];
-
+    let currentChecklist = [];
     let allTripData = [];
     let currentFilter = 'ALL';
     let currentDay1Plan = '方案2';
@@ -594,7 +534,6 @@
       const contentEl = document.getElementById('content-container');
       const planBox = document.getElementById('day1-plan-box');
 
-      // 備忘清單視圖
       if (currentFilter === 'CHECKLIST') {
         planBox.style.display = 'none';
         let html = `
@@ -603,25 +542,28 @@
               <span class="day-badge" style="background: linear-gradient(135deg, #4338ca, #6366f1); border-left-color: #a5b4fc;">📋 重要待辦確認事項與行前備忘清單</span>
             </div>
         `;
-        staticChecklist.forEach(item => {
-          html += `
-            <div class="checklist-card">
-              <div class="checklist-top">
-                <span class="checklist-cat">${item.cat}</span>
-                <span class="checklist-owner">👤 ${item.owner}</span>
+        if (currentChecklist.length === 0) {
+          html += `<div style="text-align:center; padding:30px; color:#64748b;">🐧 備忘清單載入中...</div>`;
+        } else {
+          currentChecklist.forEach(item => {
+            html += `
+              <div class="checklist-card">
+                <div class="checklist-top">
+                  <span class="checklist-cat">${item.cat}</span>
+                  <span class="checklist-owner">👤 ${item.owner}</span>
+                </div>
+                <div class="checklist-title">${item.title}</div>
+                <div class="checklist-date">⏰ 截止/執行日：${item.date}</div>
+                <div class="checklist-guide">💡 <strong>指引：</strong>${item.guide}</div>
               </div>
-              <div class="checklist-title">${item.title}</div>
-              <div class="checklist-date">⏰ 截止/執行日：${item.date}</div>
-              <div class="checklist-guide">💡 <strong>指引：</strong>${item.guide}</div>
-            </div>
-          `;
-        });
+            `;
+          });
+        }
         html += `</div>`;
         contentEl.innerHTML = html;
         return;
       }
 
-      // 一般行程視圖
       if (currentFilter === 'ALL' || currentFilter === 'Day 1') {
         planBox.style.display = 'block';
       } else {
@@ -722,11 +664,16 @@
       renderItinerary();
     }
 
-    function fetchLiveData() {
+    function fetchAllData() {
       const statusEl = document.getElementById('sync-status');
-      statusEl.innerText = "⏳ 正在連線 Google 試算表...";
+      statusEl.innerText = "⏳ 正在同步 Google 試算表最新資料...";
+      
+      const cacheBust = "&_cb=" + new Date().getTime();
+      const tripUrl = TRIP_CSV_URL + cacheBust;
+      const chkUrl = CHECKLIST_CSV_URL + cacheBust;
 
-      Papa.parse(CSV_URL, {
+      // 1. 同步行程總表
+      Papa.parse(tripUrl, {
         download: true,
         header: false,
         skipEmptyLines: true,
@@ -757,23 +704,54 @@
                   remark: getVal('remark')
                 };
               });
-
-              renderItinerary();
-              const now = new Date();
-              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-              statusEl.innerText = `✅ Pingu 已同步最新行程（${timeStr}）`;
-              return;
             }
           }
-          statusEl.innerText = `❌ 無法解析試算表內容`;
+
+          // 2. 同步備忘清單
+          Papa.parse(chkUrl, {
+            download: true,
+            header: false,
+            skipEmptyLines: true,
+            complete: function(chkResults) {
+              if (chkResults.data && chkResults.data.length > 2) {
+                const cRows = chkResults.data;
+                let hIdx = cRows.findIndex(r => r.some(c => typeof c === 'string' && (c.includes('待辦') || c.includes('項目'))));
+                if (hIdx === -1) hIdx = 1;
+                
+                const dRows = cRows.slice(hIdx + 1).filter(r => r[1] && String(r[1]).trim() !== "");
+                if (dRows.length > 0) {
+                  currentChecklist = dRows.map(r => ({
+                    cat: r[0] ? String(r[0]).trim() : "待辦",
+                    title: r[1] ? String(r[1]).trim() : "",
+                    date: r[2] ? String(r[2]).trim() : "",
+                    owner: r[3] ? String(r[3]).trim() : "",
+                    guide: r[4] ? String(r[4]).trim() : ""
+                  }));
+                }
+              }
+              renderItinerary();
+              showSuccess();
+            },
+            error: function() {
+              renderItinerary();
+              showSuccess();
+            }
+          });
         },
-        error: function(err) {
-          statusEl.innerText = `❌ 連線失敗，請確認網路或試算表狀態`;
+        error: function() {
+          statusEl.innerText = `❌ 連線失敗，請檢查網路狀態`;
         }
       });
     }
 
-    fetchLiveData();
+    function showSuccess() {
+      const statusEl = document.getElementById('sync-status');
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+      statusEl.innerText = `✅ Pingu 已同步最新行程（${timeStr}）`;
+    }
+
+    fetchAllData();
   </script>
 </body>
 </html>
